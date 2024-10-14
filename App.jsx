@@ -115,7 +115,7 @@ function App() {
       <UserProvider>
         <AuthProvider>
           <NavigationContainer>
-            {
+            {/* {
               loading === true ?
                 <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#D2DCEB" }}>
                   <ActivityIndicator size="large" color="#FF3D00" />
@@ -124,12 +124,12 @@ function App() {
                       Estamos comprobando la version de la aplicación.
                     </Text>
                   </View>
-                </View>
-                : error !== null ?
+                </View> */}
+                {/* : error !== null ?
                   renderAlertError()
-                  :
+                  : */}
                   <AuthNavigator />
-            }
+            {/* } */}
           </NavigationContainer>
         </AuthProvider>
       </UserProvider>

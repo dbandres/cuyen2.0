@@ -8,7 +8,7 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
-    "start:ios": "npm run ios -- --simulator='iPhone 15 Pro Max (7DF03EF5-B1CE-4B76-A1E7-5A79423C5647)'"
+    "start:ios": "npm run ios -- --simulator='iPhone 15 Pro Max (FFCC88DD-3A99-458D-81FC-9EF97C7CAFBE)'"
   },
   "dependencies": {
     "@adrianso/react-native-barcode-builder": "^1.0.12",

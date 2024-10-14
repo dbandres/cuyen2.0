@@ -21,6 +21,7 @@ import putContratoReducer from "../slices/putContratoSlice"
 import itinerarioReducer from "../slices/getItinerarioSlice"
 import cuotasPasajeroReducer from "../slices/getCuotasPasajeroSlice"
 import codigoBarraReducer from "../slices/getCodigoBarraPasajeroSlice"
+import deletedUserReducer from "../slices/deletedUserSlice"
 
 export const store = configureStore({
   reducer:{
@@ -44,7 +45,8 @@ export const store = configureStore({
     putContrato: putContratoReducer,
     itinerario: itinerarioReducer,
     cuotasPasajero: cuotasPasajeroReducer,
-    codigoBarra: codigoBarraReducer
+    codigoBarra: codigoBarraReducer,
+    deleteUser: deletedUserReducer
 
   }
 }, applyMiddleware(thunk))

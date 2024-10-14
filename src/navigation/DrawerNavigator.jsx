@@ -1,5 +1,5 @@
 import { createDrawerNavigator, DrawerContentScrollView } from '@react-navigation/drawer';
-import { StyleSheet, View, Text, Image, Linking, Platform } from "react-native"
+import { StyleSheet, View, Text, Image, Linking, Platform, Alert } from "react-native"
 import { CargaPasajero } from '../screens/tabScreens/CargaPasajero';
 import { Ubicacion } from '../screens/tabScreens/Ubicacion';
 import { MenuBottonItem } from './MenuBottonItem';
@@ -16,14 +16,17 @@ import { RouteInicial } from '../infoViaje/RouteInicial';
 import { AuthContext } from '../context/AuthContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { GestionContrato } from '../gestionarContrato/GestionContrato';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { putDeleteUser, setStatus, setError, setLoading } from '../slices/deletedUserSlice';
+
 
 const CustomDrawerContent = ({ navigation }) => {
 
-	const { userdata,setUserData } = useContext(UserContext)
+	const { userdata, setUserData } = useContext(UserContext)
 	const [userD, setStoredData] = useState(null);
-	const {setAuthenticate} = useContext(AuthContext)
+	const { setAuthenticate } = useContext(AuthContext)
 	const numeroContrato = useSelector((state) => state.contratoActual.numero);
+	const dispatch = useDispatch()
 
 	const singOutSession = () => {
 		AsyncStorage.removeItem("userStorage")
@@ -41,32 +44,60 @@ const CustomDrawerContent = ({ navigation }) => {
 	}
 
 	const abrirLink = (linkUrl) => {
-    const url = linkUrl;
-    Linking.openURL(url)
-      .catch((err) => console.error('Error al abrir el enlace:', err));
-  };
+		const url = linkUrl;
+		Linking.openURL(url)
+			.catch((err) => console.error('Error al abrir el enlace:', err));
+	};
 
 	const loadData = async () => {
-    try {
-      const jsonValue = await AsyncStorage.getItem('userStorage');
-      if (jsonValue !== null) {
-        const user = JSON.parse(jsonValue);
-        setStoredData(user);
-      } else {
-        Alert.alert('No data found');
-      }
-    } catch (error) {
-      console.error('Failed to load data from AsyncStorage', error);
-      Alert.alert('Failed to load data');
-    }
-  };
+		try {
+			const jsonValue = await AsyncStorage.getItem('userStorage');
+			if (jsonValue !== null) {
+				const user = JSON.parse(jsonValue);
+				setStoredData(user);
+			} else {
+				Alert.alert('Vuelva a ingresar mas tarde.');
+			}
+		} catch (error) {
+			console.error('Failed to load data from AsyncStorage', error);
+			Alert.alert('Failed to load data');
+		}
+	};
 
-	useFocusEffect(useCallback(()=>{
+	useFocusEffect(useCallback(() => {
 		loadData()
-    
-  },[]))
 
-	console.log('contrato actual! ', numeroContrato);
+	}, []))
+
+	const deleteUser = () => {
+    Alert.alert(
+      "Eliminar cuenta",
+      "¿Está seguro que desea eliminar su cuenta?",
+      [
+        {
+          text: "Cancelar",
+          onPress: () => console.log("Cancelado"),
+          style: "cancel"
+        },
+        { 
+          text: "Eliminar", 
+            onPress: () => {
+							try {
+								dispatch(putDeleteUser({id: userD.usuario.id}))
+								singOutSession()
+							} catch (error) {
+								dispatch(setError(error.message))
+							}
+						}
+          ,
+          style: "destructive"
+        }
+      ],
+      { cancelable: false }
+    );
+  }
+
+	console.log('contrato actual! ', userD);
 
 	return (
 		<DrawerContentScrollView style={{ backgroundColor: "#3462BF", flex: 1 }}>
@@ -77,15 +108,15 @@ const CustomDrawerContent = ({ navigation }) => {
 					style={styles.drawerImage}
 				/>
 			</View>
-			<View style={{ height: 70, alignItems: "center", position: "absolute", top: Platform.OS === 'android'  ? 185 : 245, left: "20%" }}>
-				<View style={{ width: "80%", height: 30, display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "flex-end"}}>
-					<TouchableOpacity onPress={()=>{abrirLink("https://www.instagram.com/cuyenturismo/")}}>
+			<View style={{ height: 70, alignItems: "center", position: "absolute", top: Platform.OS === 'android' ? 185 : 245, left: "20%" }}>
+				<View style={{ width: "80%", height: 30, display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "flex-end" }}>
+					<TouchableOpacity onPress={() => { abrirLink("https://www.instagram.com/cuyenturismo/") }}>
 						<Image
 							source={require("../assets/insta.png")}
 							style={{ width: 32, height: 32 }}
 						/>
 					</TouchableOpacity>
-					<TouchableOpacity onPress={()=>{abrirLink("https://www.facebook.com/cuyenturismo/?locale=es_LA")}}>
+					<TouchableOpacity onPress={() => { abrirLink("https://www.facebook.com/cuyenturismo/?locale=es_LA") }}>
 						<Image
 							source={require("../assets/Facebook.png")}
 							style={{ width: 32, height: 32 }}
@@ -115,7 +146,7 @@ const CustomDrawerContent = ({ navigation }) => {
 						</View>
 						<View style={{ borderWidth: 1, borderColor: "#93E396", height: 44, justifyContent: "center", borderRadius: 5 }}>
 							{/* <Text style={{ color: "#93E396", fontWeight: "600", fontSize: 12, lineHeight: 14, textAlign: "center" }}>Contrato {contratoActual.length !== 0 ? contratoActual : userdata.contrato[0]}</Text> */}
-							<Text style={{ color: "#93E396", fontWeight: "600", fontSize: 12, lineHeight: 14, textAlign: "center" }}>Contrato {numeroContrato !== null ? numeroContrato: userD?.usuario?.contrato[0]}</Text>
+							<Text style={{ color: "#93E396", fontWeight: "600", fontSize: 12, lineHeight: 14, textAlign: "center" }}>Contrato {numeroContrato !== null ? numeroContrato : userD?.usuario?.contrato[0]}</Text>
 						</View>
 					</View>
 					{
@@ -151,6 +182,19 @@ const CustomDrawerContent = ({ navigation }) => {
 						/>
 						<Text style={{ color: "#8CCBF9", marginLeft: "3%" }}>
 							Cerrar sesión
+						</Text>
+					</TouchableOpacity>
+				</View>
+			</View>
+			<View style={{ alignItems: "center", marginTop: "43%" }}>
+				<View style={{ width: "80%" }}>
+					<TouchableOpacity onPress={deleteUser} style={{ display: "flex", flexDirection: "row", height: 50, alignItems: "center" }}>
+						<Image
+							source={require("../assets/Action_Error.png")}
+							style={{ width: 28, height: 28 }}
+						/>
+						<Text style={{ color: "red", marginLeft: "3%" }}>
+							Eliminar cuenta
 						</Text>
 					</TouchableOpacity>
 				</View>
